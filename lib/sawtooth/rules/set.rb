@@ -45,7 +45,8 @@ module Sawtooth
       # If no matching rule is found, `default` is returned.
       def find(*path)
         path = path.flatten.join('/')
-        @rules.find { |rule| rule.matches?(path, self.flags) } || self.default
+        entry = @rules.find { |rule| rule.matches?(path, self.flags) }
+        entry ? entry.rule : self.default
       end
     end
   end
