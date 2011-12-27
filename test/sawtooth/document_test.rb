@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'sawtooth/document'
 
 class Sawtooth::DocumentTest < MiniTest::Unit::TestCase
 

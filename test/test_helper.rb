@@ -1,6 +1,9 @@
 require 'minitest/autorun'
 require 'minitest/pride'
 
+# load sawtooth
+require 'sawtooth'
+
 class MiniTest::Unit::TestCase
 
   # Root directory, for tests
