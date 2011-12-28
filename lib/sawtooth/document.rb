@@ -9,15 +9,24 @@ module Sawtooth
   # used to directly interact with the stack.
   class Document < ::Nokogiri::XML::SAX::Document
 
-    # Both the stack and the parser can be accessed.
-    attr_reader :path, :stack, :parser
+    # A simple Document Node representation, for the node stack.
+    Node = Struct.new(:namespace, :name, :attributes, :text) do
+      def to_s; name end
+    end
+
+    # Special freaky node for the Document and Comments
+    DOCUMENT_NODE = [Node.new(nil, '@document')]
+    COMMENT_NAME  = '@comment'
+
+    # Both the stack and the delegate can be accessed.
+    attr_reader :stack
+    attr_accessor :delegate
 
     # Creates a new Document instance with an empty stack
-    # and the supplied parser. The parser is required to
-    # apply the rules and is used to delegate several
-    # method calls to.
-    def initialize(parser)
-      @parser = parser
+    # and the supplied delegate. The delegate is required to
+    # apply the rules.
+    def initialize(delegate = nil)
+      @delegate = delegate
       reset!
     end
 
@@ -31,7 +40,6 @@ module Sawtooth
     # Pop an element of the stack
     def pop
       stack.pop
-      self
     end
 
     # Peek at an element in the stack, i.e. element 0 is the last
@@ -47,13 +55,23 @@ module Sawtooth
     # Shortcut method for current, i.e. an alias of peek without
     # an argument.
     def current; peek(0) end
+    alias_method :top, :current
 
     # Alias for `peek(1)`.
     def parent; peek(1); end
 
+    # Alias for `stack.first`
+    def root; stack.first end
+
+    # Get current path stack.
+    def path; @path_stack end
+
+    # Get current node.
+    def node; @path_stack.last end
+
     # Resets path, stack and the current text.
     def reset!
-      @path = []
+      @path_stack = []
       @stack = []
       @text = nil
     end
@@ -66,40 +84,56 @@ module Sawtooth
     alias_method :cdata_block, :characters
 
     # Called when comments are encountered, empty implementation,
-    def comment(str); end
-
-    # Called when document starts parsing, clears path and stack
-    def start_document
-      reset!
+    def comment(str)
+      cnode = Node.new(nil, COMMENT_NAME, {}, str)
+      delegate.comment((DOCUMENT_NODE + path + [cnode]).compact, self, cnode) if delegate.respond_to?(:comment)
     end
 
-    # Callend when document ends parsing, does nothing.
-    def end_document; end
+    # Called when document starts parsing, clears path and stack
+    # and calls with special @document path.
+    def start_document
+      reset!
+      delegate.start_document(DOCUMENT_NODE, self) if delegate.respond_to?(:start_document)
+    end
+
+    # Callend when document ends parsing, does call with
+    # special @document path.
+    def end_document
+      delegate.end_document(DOCUMENT_NODE, self) if delegate.respond_to?(:end_document)
+    end
 
     # Called at the beginning of an element.
     def start_element_namespace(name, attrs_ary = [], prefix = nil, uri = nil, ns = [])
       @text = nil
-      @path << name
-      attrs = Hash[*attrs_ary.flatten]
-      parser.invoke_rule!(:start, path, self, uri, name, attrs)
+      node = Node.new(uri, name, attrs_ary.inject({}) { |hsh, a| hsh[a.localname] = a.value; hsh }, '')
+      path << node
+
+      # call delegate
+      delegate.start_element(path, self, node) if delegate.respond_to?(:start_element)
     end
 
     # Called at the end of an element.
     def end_element_namespace(name, prefix = nil, uri = nil)
-      parser.invoke_rule!(:finish, path, self, uri, name, @text || '')
-      @path.pop
+      # fill text
+      node.text = @text.to_s.strip if @text
+
+      # call delegate
+      delegate.end_element(path, self, node) if delegate.respond_to?(:end_element)
+
+      # clear stack
+      @path_stack.pop
       @text = nil
     end
 
     # Pass a warning along to the parser
     def warning(string)
-      parser.warning(path, self, string)
+      delegate.warning(path, self, string) if delegate.respond_to?(:warning)
     end
 
     # Pass an error along to the parser, parser should handle
     # whether to continue or abort parsing.
     def error(string)
-      parser.error(path, self, string)
+      delegate.error(path, self, string) if delegate.respond_to?(:error)
     end
   end
 end

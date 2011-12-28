@@ -24,7 +24,7 @@ module Sawtooth
       # - namespace, the URI of the element namespace (if any)
       # - name, the node name
       # - text, element body if any
-      def finish(context, namespace, name, text)
+      def finish(context, namespace, name, text = '')
       end
     end
   end
