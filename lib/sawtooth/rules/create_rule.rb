@@ -21,14 +21,14 @@ module Sawtooth
       def keep?; !!keep end
 
       # Calls the creator and pushes item onto stack.
-      def start(context, namespace, name, attributes = {})
+      def start(document, node)
         obj = creator ? creator.call : clazz.new
-        context.push obj
+        document.push obj
       end
 
       # Removes object from stack
-      def finish(context, namespace, name, text = '')
-        context.pop unless keep?
+      def finish(document, node)
+        document.pop unless keep?
       end
     end
   end
