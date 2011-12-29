@@ -3,7 +3,7 @@ require 'test_helper'
 class Sawtooth::DelegateTest < MiniTest::Unit::TestCase
   def setup
     @parser = Sawtooth::Parser.new
-    @initRule = Sawtooth::Rules::CreateRule.new(:keep => true, :class => Array)
+    @initRule = Sawtooth::Rules::CallRule.new(:start => Proc.new { |doc| doc << Array.new })
     @addRule = Sawtooth::Rules::TextRule.new
   end
 

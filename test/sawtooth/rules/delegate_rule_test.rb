@@ -8,7 +8,7 @@ class Sawtooth::Rules::DelegateRuleTest < MiniTest::Unit::TestCase
 
   def setup
     @parser = Sawtooth::Parser.new
-    @parser.add("didum", CreateRule.new(:class => Hash, :keep => true))
+    @parser.add("didum", CallRule.new(:start => Proc.new { |doc| doc << Hash.new }))
     @parser.add("didum/da", TextRule.new)
 
     create_rule = CallRule.new do
