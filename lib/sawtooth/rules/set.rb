@@ -1,20 +1,27 @@
-require 'sawtooth/rules/base'
-
 module Sawtooth
   module Rules
 
     # An entry in the `Set`.
     class RuleEntry
 
-      # Creates a new entry using path and the rule instance.
+      # Both path and the rule are accessible.
       attr_accessor :path, :rule
+
+      # Creates a new entry using path and the rule instance.
       def initialize(path, rule)
-        @path, @rule = path, rule
+        self.path, self.rule = path, rule
+      end
+
+      def path=(path)
+        case path
+          when Regexp; @path = path
+          else @path = %r{\A#{path.gsub('**', '.+').gsub('*', '[^/]+')}\z}
+        end
       end
 
       # Returns `true` if the current path matches.
-      def matches?(test, flags = 0)
-        File.fnmatch(self.path, test, flags)
+      def matches?(test)
+        test =~ path
       end
     end
 
@@ -23,14 +30,11 @@ module Sawtooth
     # Rules are matched using `File.fnmatch`.
     class Set
 
-      # Accessor for the default rule, flags and the array of
-      # rules.
-      attr_reader :default, :flags, :rules
+      # Accessor for the array of rules.
+      attr_reader :rules
 
-      # Creates a new rule set with the defined default rule
-      def initialize(default = Sawtooth::Rules::Base.new, flags = 0)
-        @default = default
-        @flags = flags
+      # Creates a new rule set.
+      def initialize
         @rules = []
       end
 
@@ -45,8 +49,8 @@ module Sawtooth
       # If no matching rule is found, `default` is returned.
       def find(*path)
         path = path.flatten.join('/')
-        match = @rules.find { |rule| rule.matches?(path, self.flags) }
-        match ? match.rule : self.default
+        match = @rules.find { |rule| rule.matches?(path) }
+        match.rule if match
       end
     end
   end
