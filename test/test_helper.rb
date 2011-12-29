@@ -1,5 +1,4 @@
 require 'minitest/autorun'
-require 'minitest/pride'
 
 # load sawtooth
 require 'sawtooth'

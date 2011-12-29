@@ -3,6 +3,13 @@ require 'sawtooth/rules'
 
 module Sawtooth
 
+  # Yield a builder instance and start working on pushing
+  # rules around like crazy.
+  #
+  def self.rules(&block)
+    Sawtooth::Builder.new(&block)
+  end
+
   # Provides a nice and hopefully easy to use DSL to build rules and start
   # parsing XML documents with ease.
   #
