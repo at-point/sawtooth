@@ -13,6 +13,9 @@ module Sawtooth
     # Array of accessible rules.
     attr_reader :rules
 
+    # Callbacks are both, read & writeable.
+    attr_accessor :before_callback, :after_callback
+
     # Creates a new instance.
     def initialize(options = {})
       @rules = Sawtooth::Rules::Set.new
@@ -28,6 +31,7 @@ module Sawtooth
 
     # Start document callback
     def start_document(path, doc)
+      before_callback.call(doc) if before_callback.respond_to?(:call)
       rule = rules.find(path)
       rule.start(doc, nil) if rule && rule.respond_to?(:start)
     end
@@ -36,6 +40,7 @@ module Sawtooth
     def end_document(path, doc)
       rule = rules.find(path)
       rule.finish(doc, nil) if rule && rule.respond_to?(:finish)
+      after_callback.call(doc) if after_callback.respond_to?(:call)
     end
 
     # Start element callback

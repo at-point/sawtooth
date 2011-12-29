@@ -13,7 +13,7 @@ module Sawtooth
     # Creates a new instance.
     def initialize(&block)
       @parser = Sawtooth::Parser.new
-      self.instance_eval(&block) if block_given?
+      self.rules(&block) if block_given?
     end
 
     # Provide a block of rules.
@@ -26,41 +26,37 @@ module Sawtooth
       parser.parse(thingy)
     end
 
-    # DSL
+    def before(&block)
+      parser.before_callback = block
+    end
+
+    def after(&block)
+      parser.after_callback = block
+    end
+
+    def on_start(path, &block)
+      parser.add(path, Sawtooth::Rules::CallRule.new(:start => block)) if block_given?
+    end
+
+    def on_finish(path, &block)
+      parser.add(path, Sawtooth::Rules::CallRule.new(:finish => block)) if block_given?
+    end
+
     def on(path, &block)
-      @rule = Sawtooth::Rules::MultiRule.new
-      self.instance_eval(&block) if block_given?
-      parser.add(path, @rule.flatten) unless @rule.empty?
-      @rule = nil
+      if block_given?
+        rule = block.arity <= 0 ? Sawtooth::Rules::CallRule.new(&block) : Sawtooth::Rules::CallRule.new(:start => block)
+        parser.add(path, rule)
+      end
     end
 
-    # Pushes a root Element onto the stack.
-    def root(clazz = nil, &block)
-      parser.add('@document', Sawtooth::Rules::CreateRule.new(:class => clazz, :keep => true, &block))
-    end
-
-    # Execute a block at start or finish of an element.
-    def call(pos = :finish, &block)
-      @rule << Sawtooth::Rules::CallRule.new { pos == :finish ? at_finish(&block) : at_start(&block) } if @rule
-    end
-
-    # Add a create rule for the current path.
-    #
-    def create(clazz = nil, &block)
-      @rule << Sawtooth::Rules::CreateRule.new(clazz, &block) if @rule
-    end
-
-    # Small custom handler currently which pushes the current item
-    # to `peek(1)`.
-    def push
-      @rule << Sawtooth::Rules::CallRule.new do
-        at_finish { |doc| doc.parent << doc.top }
-      end if @rule
-    end
-
-    # Adds a `TextRule`
-    def text(name = nil, &block)
-      @rule << Sawtooth::Rules::TextRule.new(name, &block) if @rule
+    def on_text(mappings = {}, &block)
+      if mappings.respond_to?(:to_str)
+        parser.add(mappings.to_str, Sawtooth::Rules::TextRule.new(&block))
+      else
+        mappings.each do |path, name|
+          parser.add(path, Sawtooth::Rules::TextRule.new(name, &block))
+        end
+      end
     end
   end
 end

@@ -7,8 +7,8 @@ module Sawtooth
     # of code upon start or finish.
     #
     #    CallRule.new do
-    #      at_start  { |doc, name, attrs| doc << name }
-    #      at_finish { |doc, name, text| doc.pop }
+    #      on_start  { |doc, name, attrs| doc << name }
+    #      on_finish { |doc, name, text| doc.pop }
     #    end
     #
     class CallRule < Base
@@ -21,12 +21,12 @@ module Sawtooth
       end
 
       # Configure the `on_start` block.
-      def at_start(&block)
+      def on_start(&block)
         @options[:start] = block
       end
 
       # Configure the `on_finish` block.
-      def at_finish(&block)
+      def on_finish(&block)
         @options[:finish] = block
       end
 
