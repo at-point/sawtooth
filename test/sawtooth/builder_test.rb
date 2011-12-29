@@ -24,31 +24,32 @@ class Sawtooth::BuilderTest < MiniTest::Unit::TestCase
     assert_equal 'web', @doc.root[:source]
   end
 
-  #def test_delegate_shortcut
-  #  @user = Sawtooth::Builder.new do
-  #    on('user') do
-  #      on_open  { |doc| doc << Hash.new }
-  #      on_close { |doc| doc.parent['user'] = doc.pop }
-  #    end
-  #
-  #    on_text('user/name')
-  #    on_text('user/screen_name')
-  #    on_text('user/id') { |str| str.to_i }
-  #  end
-  #
-  #  @builder = Sawtooth::Builder.new do
-  #    before { |doc| doc << Array }
-  #
-  #    on('statuses/status') do
-  #      on_open  { |doc| doc << Hash.new }
-  #      on_close { |doc| doc.parent << doc.pop }
-  #    end
-  #
-  #    on_text('statuses/status/text')
-  #    #delegate('statuses/status/user/**' => @user) { |doc| p doc.pop }
-  #  end
-  #
-  #  @doc = @builder.parse File.read(fixture_path('statuses.xml'))
-  #  p @doc.root.first
-  #end
+  def test_delegate_shortcut
+    user = Sawtooth::Builder.new do
+      before { |doc| doc << Hash.new }
+      after  { |doc| doc.parent['user'] = doc.pop }
+
+      on_text('user/name')
+      on_text('user/screen_name')
+      on_text('user/id') { |str| str.to_i }
+    end
+
+    builder = Sawtooth::Builder.new do
+      before { |doc| doc << [] }
+      after  { |doc| doc << doc.pop.last }
+
+      on('statuses/status') do
+        on_start  { |doc| doc << Hash.new }
+        on_finish { |doc| doc.parent << doc.pop }
+      end
+
+      on_text('statuses/status/text')
+      delegate('statuses/status/user/**' => user)
+    end
+
+    @doc = builder.parse File.read(fixture_path('statuses.xml'))
+    assert_match /^Netshare will no longer start up for me\./, @doc.root['text']
+    assert_equal 'John Nunemaker', @doc.root['user']['name']
+    assert_equal 4243, @doc.root['user']['id']
+  end
 end

@@ -12,8 +12,8 @@ class Sawtooth::Rules::DelegateRuleTest < MiniTest::Unit::TestCase
     @parser.add("didum/da", TextRule.new)
 
     create_rule = CallRule.new do
-      at_start { |doc| doc.push Hash.new }
-      at_finish { |doc| obj = doc.pop; doc.top['del'] = obj }
+      on_start { |doc| doc.push Hash.new }
+      on_finish { |doc| obj = doc.pop; doc.top['del'] = obj }
     end
 
     @rules = Sawtooth::Rules::Set.new

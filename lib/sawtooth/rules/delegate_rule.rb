@@ -1,4 +1,5 @@
 require 'sawtooth/rules/base'
+require 'sawtooth/rules/call_rule'
 
 module Sawtooth
   module Rules
@@ -9,6 +10,19 @@ module Sawtooth
     # Delegates must be mapped using `path/**`
     class DelegateRule < Base
 
+      class CallbacksRule < Base
+        def initialize(delegate); @delegate = delegate end
+        def start(doc, node)
+          rule = @delegate.rules && @delegate.rules.find('@document:before')
+          rule.start(doc, node) if rule && rule.respond_to?(:start)
+        end
+
+        def finish(doc, node)
+          rule = @delegate.rules && @delegate.rules.find('@document:after')
+          rule.finish(doc, node) if rule && rule.respond_to?(:finish)
+        end
+      end
+
       # Access the set of rules and prefix.
       attr_accessor :rules, :prefix
 
@@ -16,6 +30,12 @@ module Sawtooth
       def initialize(options = {}, &block)
         self.rules = options[:rules]
         self.prefix = options[:prefix] || ''
+      end
+
+      # Builds a special rule which invokes :before and :after callbacks on the
+      # supplied set of rules.
+      def before_after_callbacks_rule
+        @before_after_callbacks_rule ||= CallbacksRule.new(self)
       end
 
       def start(doc, node)
