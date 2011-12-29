@@ -29,16 +29,16 @@ module Sawtooth
       end
 
       # Calls the creator and pushes item onto stack.
-      def start(context, namespace, name, attributes = {})
+      def start(doc, node)
         self.rules.each do |rule|
-          rule.start(context, namespace, name, attributes) if rule.respond_to?(:start)
+          rule.start(doc, node) if rule.respond_to?(:start)
         end
       end
 
       # Removes object from stack
-      def finish(context, namespace, name, text = '')
+      def finish(doc, node)
         self.rules.reverse.each do |rule|
-          rule.finish(context, namespace, name, text) if rule.respond_to?(:finish)
+          rule.finish(doc, node) if rule.respond_to?(:finish)
         end
       end
     end
