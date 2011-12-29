@@ -9,6 +9,9 @@ class MiniTest::Unit::TestCase
   # Root directory, for tests
   TEST_ROOT = File.dirname(__FILE__)
 
+  # Testing Stack
+  def doc; @doc ||= Sawtooth::Document.new end
+
   # Helper which creates a new Sawtooth::Document::Node
   # Instance.
   #
