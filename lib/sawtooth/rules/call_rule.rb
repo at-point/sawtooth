@@ -51,8 +51,8 @@ module Sawtooth
       protected
         def invoke_block(block, doc, node)
           case block.arity
-            when 1; block.call(document)
-            else block.call(document, node)
+            when 1; block.call(doc)
+            else block.call(doc, node)
           end if block && block.respond_to?(:call)
         end
     end

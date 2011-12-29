@@ -1,8 +1,6 @@
 require 'test_helper'
 
 class Sawtooth::Rules::CreateRuleTest < MiniTest::Unit::TestCase
-  def doc; @doc ||= Sawtooth::Document.new end
-
   def test_creates_instance_of_supplied_class
     rule = Sawtooth::Rules::CreateRule.new Hash
     assert_equal Hash, rule.clazz

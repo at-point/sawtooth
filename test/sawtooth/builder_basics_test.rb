@@ -6,10 +6,6 @@ class Sawtooth::BuilderBasicsTest < MiniTest::Unit::TestCase
     @builder = Sawtooth::Builder.new do
       root Array
 
-      on('statuses') do
-        call { |doc, node| p node }
-      end
-
       on('statuses/status') do
         create(Hash)
         push
@@ -19,13 +15,13 @@ class Sawtooth::BuilderBasicsTest < MiniTest::Unit::TestCase
       on('statuses/status/created_at') do
         text(:created_at) { |str| Date.parse(str) }
       end
-      on('statuses/status/*') { text }
+      on('statuses/status/*') { text(Proc.new { |str| str.to_sym }) }
     end
 
     @doc = @builder.parse File.read(fixture_path('statuses.xml'))
     assert_equal 'I so just thought the guy lighting the Olympic torch was falling when he began to run on the wall. Wow that would have been catastrophic.', @doc.root.first[:value]
     assert_equal '2008-08-09', @doc.root.first[:created_at].strftime('%Y-%m-%d')
-
-    p @doc.root.first
+    assert_nil @doc.root.first[:screen_name]
+    assert_equal 'web', @doc.root.first[:source]
   end
 end

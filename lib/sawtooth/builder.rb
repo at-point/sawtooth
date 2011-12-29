@@ -39,10 +39,9 @@ module Sawtooth
       parser.add('@document', Sawtooth::Rules::CreateRule.new(:class => clazz, :keep => true, &block))
     end
 
-    def call(&block)
-      @rule << Sawtooth::Rules::CallRule.new do
-        at_finish { |doc| block.call(doc, doc.node) }
-      end if @rule
+    # Execute a block at start or finish of an element.
+    def call(pos = :finish, &block)
+      @rule << Sawtooth::Rules::CallRule.new { pos == :finish ? at_finish(&block) : at_start(&block) } if @rule
     end
 
     # Add a create rule for the current path.

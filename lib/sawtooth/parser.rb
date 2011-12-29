@@ -4,10 +4,17 @@ require 'sawtooth/document'
 require 'sawtooth/rules/set'
 
 module Sawtooth
-  class Parser
-    attr_accessor :rules
 
-    def initialize
+  # Default Parser implementation, can be used as a
+  # starting point for custom implementations.
+  #
+  class Parser
+
+    # Array of accessible rules.
+    attr_reader :rules
+
+    # Creates a new instance.
+    def initialize(options = {})
       @rules = Sawtooth::Rules::Set.new
     end
 
@@ -16,17 +23,31 @@ module Sawtooth
       rules.add(path, rule)
     end
 
-    # Invokes a rule if present and responding to method
-    # in question.
-    #
-    def invoke_start!(path, doc, namespace, name, attrs = {})
+    # Recieved a comment node.
+    def comment(path, doc, str); end
+
+    # Start document callback
+    def start_document(path, doc)
       rule = rules.find(path)
-      rule.start(doc, namespace, name, attrs) if rule && rule.respond_to?(:start)
+      rule.start(doc, nil) if rule && rule.respond_to?(:start)
     end
 
-    def invoke_finish!(path, doc, namespace, name, text = '')
+    # End document callback
+    def end_document(path, doc)
       rule = rules.find(path)
-      rule.finish(doc, namespace, name, text) if rule && rule.respond_to?(:finish)
+      rule.finish(doc, nil) if rule && rule.respond_to?(:finish)
+    end
+
+    # Start element callback
+    def start_element(path, doc, node)
+      rule = rules.find(path)
+      rule.start(doc, node) if rule && rule.respond_to?(:start)
+    end
+
+    # End document callback
+    def end_element(path, doc, node)
+      rule = rules.find(path)
+      rule.finish(doc, node) if rule && rule.respond_to?(:finish)
     end
 
     # Parses and XML thingy, a filename, path, IO or content
