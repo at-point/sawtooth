@@ -22,6 +22,9 @@ module Sawtooth
       # - node, the current node
       def finish(document, node)
       end
+
+      # Basically calls inspect
+      def print_rule; self.class.name end
     end
   end
 end

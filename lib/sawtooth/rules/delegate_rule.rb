@@ -13,6 +13,7 @@ module Sawtooth
       class CallbacksRule < Base
         def initialize(delegate); @delegate = delegate end
         def start(doc, node)
+          doc['@delegate:prefix'].push @delegate.prefix
           rule = @delegate.rules && @delegate.rules.find('@document:before')
           rule.start(doc, node) if rule && rule.respond_to?(:start)
         end
@@ -20,6 +21,7 @@ module Sawtooth
         def finish(doc, node)
           rule = @delegate.rules && @delegate.rules.find('@document:after')
           rule.finish(doc, node) if rule && rule.respond_to?(:finish)
+          doc['@delegate:prefix'].pop
         end
       end
 
@@ -48,12 +50,20 @@ module Sawtooth
         rule.finish(doc, node) if rule && rule.respond_to?(:finish)
       end
 
+      def print_rule
+        "#{self.class.name}, rules=[\n\t".tap do |str|
+          str << rules.print_rules.split("\n").join("\n\t") << "\n" if rules && rules.respond_to?(:print_rules)
+          str << "]"
+        end
+      end
+
       protected
 
         # Returns the relative current path, based
         # on the prefix.
         def relative_path(doc)
-          doc.path.join('/').gsub(%r{\A#{prefix}/?}, '')
+          abs_prefix = doc['@delegate:prefix'].join('/')
+          doc.path.join('/').gsub(%r{\A#{abs_prefix}/?}, '')
         end
     end
   end

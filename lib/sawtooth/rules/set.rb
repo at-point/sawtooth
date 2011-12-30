@@ -6,6 +6,7 @@ module Sawtooth
 
       # Both path and the rule are accessible.
       attr_accessor :path, :rule
+      attr_reader :orig_path
 
       # Creates a new entry using path and the rule instance.
       def initialize(path, rule)
@@ -13,6 +14,7 @@ module Sawtooth
       end
 
       def path=(path)
+        @orig_path = path
         case path
           when Regexp; @path = path
           else @path = %r{\A#{path.gsub('**', '.+').gsub('*', '[^/]+')}\z}
@@ -31,16 +33,16 @@ module Sawtooth
     class Set
 
       # Accessor for the array of rules.
-      attr_reader :rules
+      attr_reader :items
 
       # Creates a new rule set.
       def initialize
-        @rules = []
+        @items = []
       end
 
       # Adds a new `RuleEntry`.
       def add(path, rule)
-        self.rules << RuleEntry.new(path, rule)
+        self.items << RuleEntry.new(path, rule)
       end
 
       # Find a rule matching the supplied path (or path array), if not
@@ -49,8 +51,15 @@ module Sawtooth
       # If no matching rule is found, `default` is returned.
       def find(*path)
         path = path.flatten.join('/')
-        match = @rules.find { |rule| rule.matches?(path) }
+        match = self.items.find { |rule| rule.matches?(path) }
         match.rule if match
+      end
+
+      # Pretty print rules.
+      def print_rules
+        "".tap do |str|
+          items.each { |entry| str << "#{entry.orig_path}  => #{entry.rule.print_rule}\n" }
+        end
       end
     end
   end

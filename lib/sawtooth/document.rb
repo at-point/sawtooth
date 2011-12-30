@@ -14,12 +14,25 @@ module Sawtooth
       def to_s; name end
     end
 
+    class Stack < Array
+      def peek(n = 0)
+        self[(n + 1) * -1]
+      end
+
+      def current; peek(0) end
+      alias_method :top, :current
+
+      def parent; peek(-1) end
+
+      def root; first end
+    end
+
     # Special freaky node for the Document and Comments
     DOCUMENT_NODE = [Node.new(nil, '@document')]
     COMMENT_NAME  = '@comment'
 
     # Both the stack and the delegate can be accessed.
-    attr_reader :stack
+    attr_reader :stack, :stacks
     attr_accessor :delegate
 
     # Creates a new Document instance with an empty stack
@@ -69,10 +82,16 @@ module Sawtooth
     # Get current node.
     def node; @path_stack.last end
 
+    # Direct access to customizeable stacks
+    def [](key)
+      stacks[key]
+    end
+
     # Resets path, stack and the current text.
     def reset!
       @path_stack = []
       @stack = []
+      @stacks = Hash.new { |hsh, k| hsh[k] = Stack.new }
       @text = nil
     end
 

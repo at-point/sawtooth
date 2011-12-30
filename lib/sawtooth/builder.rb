@@ -47,29 +47,29 @@ module Sawtooth
     end
 
     def on_start(path, &block)
-      parser.add(path, Sawtooth::Rules::CallRule.new(:start => block)) if block_given?
+      rules.add(path, Sawtooth::Rules::CallRule.new(:start => block)) if block_given?
     end
 
     # Called when the node has finished parsing, i.e. text and everything is available.
     #
     def on_finish(path, &block)
-      parser.add(path, Sawtooth::Rules::CallRule.new(:finish => block)) if block_given?
+      rules.add(path, Sawtooth::Rules::CallRule.new(:finish => block)) if block_given?
     end
     alias_method :on_node, :on_finish
 
     def on(path, &block)
       if block_given?
         rule = block.arity <= 0 ? Sawtooth::Rules::CallRule.new(&block) : Sawtooth::Rules::CallRule.new(:start => block)
-        parser.add(path, rule)
+        rules.add(path, rule)
       end
     end
 
     def on_text(mappings = {}, &block)
       if mappings.respond_to?(:to_str)
-        parser.add(mappings.to_str, Sawtooth::Rules::TextRule.new(&block))
+        rules.add(mappings.to_str, Sawtooth::Rules::TextRule.new(&block))
       else
         mappings.each do |path, name|
-          parser.add(path, Sawtooth::Rules::TextRule.new(name, &block))
+          rules.add(path, Sawtooth::Rules::TextRule.new(name, &block))
         end
       end
     end
@@ -77,11 +77,11 @@ module Sawtooth
     def delegate(delegation = {})
       path = delegation.keys.find { |k| k.to_s =~ %r{/\*\*?\z} }
       to = delegation[path]
-      prefix = delegation[:prefix] || path.gsub(%r{/[^/]+/\*\*?\z}, '')
+      prefix = delegation[:prefix] || path.gsub(%r{/?[^/]+/\*\*?\z}, '')
 
       rule = Sawtooth::Rules::DelegateRule.new(:rules => to.respond_to?(:rules) ? to.rules : to, :prefix => prefix)
-      parser.add(path, rule)
-      parser.add(path.gsub(%r{/\*\*?\z}, ''), rule.before_after_callbacks_rule)
+      rules.add(path.gsub(%r{/\*\*?\z}, ''), rule.before_after_callbacks_rule)
+      rules.add(path, rule)
     end
   end
 end

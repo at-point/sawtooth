@@ -18,7 +18,7 @@ class Sawtooth::Rules::SetTest < MiniTest::Unit::TestCase
   end
 
   def test_adding_rules
-    assert_equal 2, @set.rules.last.rule
+    assert_equal 2, @set.items.last.rule
   end
 
   def test_matching_static_rules
