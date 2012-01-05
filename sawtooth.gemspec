@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email       = ["lukas.westermann@gmail.com"]
   s.homepage    = ""
   s.summary     = %q{Declarative XML parsing using nokogiri}
-  s.description = %q{Provides an interface to parse XML files like using Apache Digester.}
+  s.description = %q{Provides an interface on top of nokogiri to parse XML files like Apache Digester.}
 
   s.rubyforge_project = "sawtooth"
 
