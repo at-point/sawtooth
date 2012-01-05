@@ -24,7 +24,7 @@ module Sawtooth
       end
 
       # If theres some text, send it to reciever (top object).
-      def finish(doc, node)
+      def finish(path, doc, node)
         value = converter.call(node.text)
         attr_name = (self.name.respond_to?(:call) ? self.name.call(node.name) : self.name) || underscore(node.name)
         obj = doc.top

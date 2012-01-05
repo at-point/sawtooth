@@ -29,25 +29,25 @@ module Sawtooth
     # Start document callback
     def start_document(path, doc)
       rule = rules.find('@document:before')
-      rule.start(doc, nil) if rule && rule.respond_to?(:start)
+      rule.start(path.join('/'), doc, nil) if rule && rule.respond_to?(:start)
     end
 
     # End document callback
     def end_document(path, doc)
       rule = rules.find('@document:after')
-      rule.finish(doc, nil) if rule && rule.respond_to?(:finish)
+      rule.finish(path.join('/'), doc, nil) if rule && rule.respond_to?(:finish)
     end
 
     # Start element callback
     def start_element(path, doc, node)
       rule = rules.find(path)
-      rule.start(doc, node) if rule && rule.respond_to?(:start)
+      rule.start(path.join('/'), doc, node) if rule && rule.respond_to?(:start)
     end
 
     # End document callback
     def end_element(path, doc, node)
       rule = rules.find(path)
-      rule.finish(doc, node) if rule && rule.respond_to?(:finish)
+      rule.finish(path.join('/'), doc, node) if rule && rule.respond_to?(:finish)
     end
 
     def error(path, doc, message)
@@ -57,10 +57,10 @@ module Sawtooth
     # Parses and XML thingy, a filename, path, IO or content
     # from memory. Provides and optional encoding, which defaults
     # to `UTF-8`.
-    def parse(thing, encoding = 'UTF-8', &block)
+    def parse(thing, encoding = 'UTF-8')
       Sawtooth::Document.new(self).tap do |doc|
-        parser = Nokogiri::XML::SAX::Parser.new(doc, encoding)
-        parser.parse(thing, &block)
+        sax_parser = Nokogiri::XML::SAX::Parser.new(doc, encoding)
+        sax_parser.parse(thing)
       end
     end
   end

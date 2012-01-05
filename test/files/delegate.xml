@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Articles>
+  <Author>lukas</Author>
+  <Version>35</Version>
+
+  <Section>
+    <Name>Ruby</Name>
+    <Article>
+      <Blocks id="first">
+        <Title>Didum</Title>
+        <Text>Dadam</Text>
+      </Blocks>
+    </Article>
+    <Article>
+      <Blocks id="second">
+        <Title>Argh</Title>
+        <Text>Urgh</Text>
+      </Blocks>
+    </Article>
+  </Section>
+  <MainArticle>
+    <Blocks id="main">
+      <Title>Foobar</Title>
+      <Text>Barfoo</Text>
+    </Blocks>
+  </MainArticle>
+
+  <MainArticle>
+    <Blocks id="other">
+      <Title>Other</Title>
+      <Text>Article</Text>
+    </Blocks>
+  </MainArticle>
+</Articles>

@@ -34,7 +34,7 @@ module Sawtooth
       #
       # - doc, the current sawtooth document stack
       # - node, the current node
-      def start(doc, node)
+      def start(path, doc, node)
         invoke_block @options[:start], doc, node
       end
 
@@ -44,7 +44,7 @@ module Sawtooth
       #
       # - doc, the current sawtooth document stack
       # - node, the current node
-      def finish(doc, node)
+      def finish(path, doc, node)
         invoke_block @options[:finish], doc, node
       end
 

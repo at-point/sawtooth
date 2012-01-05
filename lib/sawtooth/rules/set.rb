@@ -57,9 +57,7 @@ module Sawtooth
 
       # Pretty print rules.
       def print_rules
-        "".tap do |str|
-          items.each { |entry| str << "#{entry.orig_path}  => #{entry.rule.print_rule}\n" }
-        end
+        items.inject('') { |str, entry| str << "#{entry.orig_path}  => #{entry.rule.print_rule}\n" }
       end
     end
   end

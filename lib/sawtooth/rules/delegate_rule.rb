@@ -11,17 +11,18 @@ module Sawtooth
     class DelegateRule < Base
 
       class CallbacksRule < Base
+
+        attr_reader :delegate
+
         def initialize(delegate); @delegate = delegate end
-        def start(doc, node)
-          doc['@delegate:prefix'].push @delegate.prefix
+        def start(path, doc, node)
           rule = @delegate.rules && @delegate.rules.find('@document:before')
-          rule.start(doc, node) if rule && rule.respond_to?(:start)
+          rule.start(path, doc, node) if rule && rule.respond_to?(:start)
         end
 
-        def finish(doc, node)
+        def finish(path, doc, node)
           rule = @delegate.rules && @delegate.rules.find('@document:after')
-          rule.finish(doc, node) if rule && rule.respond_to?(:finish)
-          doc['@delegate:prefix'].pop
+          rule.finish(path, doc, node) if rule && rule.respond_to?(:finish)
         end
       end
 
@@ -41,18 +42,16 @@ module Sawtooth
         @before_after_callbacks_rule ||= CallbacksRule.new(self)
       end
 
-      def start(doc, node)
-        rule = rules && rules.find(relative_path(doc))
-
-        rel = relative_path(doc)
-        puts " >>> #{doc.path * '/'} @ #{rel} => #{rule.class.name}"
-
-        rule.start(doc, node) if rule && rule.respond_to?(:start)
+      def start(path, doc, node)
+        new_path = relative_path(path)
+        rule = rules && rules.find(new_path)
+        rule.start(new_path, doc, node) if rule && rule.respond_to?(:start)
       end
 
-      def finish(doc, node)
-        rule = rules && rules.find(relative_path(doc))
-        rule.finish(doc, node) if rule && rule.respond_to?(:finish)
+      def finish(path, doc, node)
+        new_path = relative_path(path)
+        rule = rules && rules.find(new_path)
+        rule.finish(new_path, doc, node) if rule && rule.respond_to?(:finish)
       end
 
       def print_rule
@@ -66,9 +65,10 @@ module Sawtooth
 
         # Returns the relative current path, based
         # on the prefix.
-        def relative_path(doc)
-          abs_prefix = doc['@delegate:prefix'].join('/').gsub(%r{/+}, '/')
-          doc.path.join('/').gsub(%r{\A#{abs_prefix}/?}, '')
+        def relative_path(path)
+          path[self.prefix.size..-1].gsub(%r{^/}, '').tap do |pth|
+            #puts "self.prefix=#{self.prefix}, path=#{path}, result=#{pth}"
+          end
         end
     end
   end

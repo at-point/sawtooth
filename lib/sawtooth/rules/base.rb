@@ -9,18 +9,20 @@ module Sawtooth
 
       # Called when the beginning of a matching XML node is encountered.
       #
+      # - path, current (maybe rewritten) path
       # - document, the current sawtooth parser stack (`Sawtooth::Document`)
       # - node, the current node to process
-      def start(document, node)
+      def start(path, document, node)
       end
 
       # Called when the end of a matching XML node is encountered.
       # If an element has no body, this method is called with an empty
       # string instead.
       #
+      # - path, current (maybe rewritten) path
       # - document, the current sawtooth parser stack (`Sawtooth::Document`)
       # - node, the current node
-      def finish(document, node)
+      def finish(path, document, node)
       end
 
       # Basically calls inspect
