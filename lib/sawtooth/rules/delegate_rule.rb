@@ -26,10 +26,11 @@ module Sawtooth
       end
 
       # Access the set of rules and prefix.
-      attr_accessor :rules, :prefix
+      attr_accessor :rules, :prefix, :path
 
       # Initialize with a set of rules and a prefix
       def initialize(options = {}, &block)
+        self.path = options[:path]
         self.rules = options[:rules]
         self.prefix = options[:prefix] || ''
       end
@@ -42,6 +43,10 @@ module Sawtooth
 
       def start(doc, node)
         rule = rules && rules.find(relative_path(doc))
+
+        rel = relative_path(doc)
+        puts " >>> #{doc.path * '/'} @ #{rel} => #{rule.class.name}"
+
         rule.start(doc, node) if rule && rule.respond_to?(:start)
       end
 
@@ -62,7 +67,7 @@ module Sawtooth
         # Returns the relative current path, based
         # on the prefix.
         def relative_path(doc)
-          abs_prefix = doc['@delegate:prefix'].join('/')
+          abs_prefix = doc['@delegate:prefix'].join('/').gsub(%r{/+}, '/')
           doc.path.join('/').gsub(%r{\A#{abs_prefix}/?}, '')
         end
     end

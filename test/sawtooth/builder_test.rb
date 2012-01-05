@@ -47,6 +47,8 @@ class Sawtooth::BuilderTest < MiniTest::Unit::TestCase
       delegate('statuses/status/user/**' => user)
     end
 
+    puts builder.rules.print_rules
+
     @doc = builder.parse File.read(fixture_path('statuses.xml'))
     assert_match /^Netshare will no longer start up for me\./, @doc.root['text']
     assert_equal 'John Nunemaker', @doc.root['user']['name']

@@ -50,6 +50,10 @@ module Sawtooth
       rule.finish(doc, node) if rule && rule.respond_to?(:finish)
     end
 
+    def error(path, doc, message)
+      raise message
+    end
+
     # Parses and XML thingy, a filename, path, IO or content
     # from memory. Provides and optional encoding, which defaults
     # to `UTF-8`.
